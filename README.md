@@ -1,4 +1,4 @@
-# Dimension-Reduction-Trees
+# Dimension-Reduction-Trees 
  
 This project investigates the use of tree-like structures to reduce the dimensionality of / discover local structure within a large pannel of heterogeneous time series. 
 
