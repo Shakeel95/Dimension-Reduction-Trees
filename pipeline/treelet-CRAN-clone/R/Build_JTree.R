@@ -1,5 +1,10 @@
 Build_JTree <-
-function(C, cc, maxlev,whichsave){
+function(C,
+         cc,
+         maxlev,
+         whichsave
+        ){
+    
 	myCs=list()
     dim_C = dim(C)[1]
     J = maxlev
@@ -16,15 +21,24 @@ function(C, cc, maxlev,whichsave){
     all_d = matrix(rep(0, J * dim_C), ncol = dim_C)
     all_nodes = matrix(rep(0, J * dim_C), ncol = dim_C)
     cc.out = rep(NA,maxlev)
+    
     for (lev in 1:J) {
-        mask_C = upper.tri(cc) * cc
-        k = (mask_C == 0)
+        
+        # sets lower trinagle of correlaion matrix to -1 
+        mask_C = upper.tri(cc) * cc 
+        k = (mask_C == 0) 
         mask_C[k] = -1
         mask_C[maskno, ] = -1
         mask_C[, maskno] = -1
+        
+        # find largest components of correlation matrix
+        # multiply by correlation matrix
         compno = which(mask_C == max(mask_C), arr.ind = TRUE)[1,]
         Cred = C[compno, compno]
-	cc.out[lev] = cc[compno,compno][1,2]
+        cc.out[lev] = cc[compno,compno][1,2]
+        
+        # corner solutoin 
+        # two most correalted variables are uncorrelated 
         if (Cred[1, 2] == 0) {
             Cnew = C
             ccnew = cc
@@ -32,7 +46,11 @@ function(C, cc, maxlev,whichsave){
             theta = 0
             idx = c(1, 2)
         }
+        
+        
         else {
+            
+            # construct Jacobi rotation
             C11 = Cred[1, 1]
             C22 = Cred[2, 2]
             C12 = Cred[1, 2]
@@ -40,10 +58,13 @@ function(C, cc, maxlev,whichsave){
             cs = cos(th)
             sn = sin(th)
             R = rbind(c(cs, -sn), c(sn, cs))
+            
+            # rotate highly correlated components 
             M = C
             M[compno, ] = t(R) %*% C[compno, ]
             C = M
             C[, compno] = M[, compno] %*% R
+            
             Cred = C[compno, compno]
             idx = c(Cred[1, 1], Cred[2, 2])
             idx = sort.list(idx, decreasing = TRUE)
@@ -53,6 +74,7 @@ function(C, cc, maxlev,whichsave){
             cc[compno, ] = temp
             cc[, compno] = t(temp)
         }
+        
         PCidx[lev, ] = idx
         theta[lev] = th
         T[[lev]] = R
