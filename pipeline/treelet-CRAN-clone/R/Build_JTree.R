@@ -47,7 +47,6 @@ function(C,
             idx = c(1, 2)
         }
         
-        
         else {
             
             # construct Jacobi rotation
