@@ -37,5 +37,5 @@ The function of each sub-directory is as follows:
 
 ## Depends
 
-Python (>= 3..0.0) 
+Python (>= 3.0.0) 
 R (>= 3.0.0)
