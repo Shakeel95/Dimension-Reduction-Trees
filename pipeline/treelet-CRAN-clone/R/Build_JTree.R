@@ -94,8 +94,9 @@ function(C,
         Zpos[lev, ] = compno
         all_d[lev, ] = t(dlabels)
         all_nodes[lev, ] = nodes
-		if (lev %in% whichsave) {myCs[[lev]]=C}
-		else myCs[[lev]]=NULL
+        if (lev %in% whichsave) {myCs[[lev]]=C}
+        else myCs[[lev]]=NULL
+        
 if(lev%%100==0){print(lev);flush.console()}
     }
     return(list(Zpos = Zpos, T = T, PCidx = PCidx, all_nodes = all_nodes, 

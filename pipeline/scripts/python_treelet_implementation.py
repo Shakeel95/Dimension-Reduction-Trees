@@ -1,6 +1,7 @@
 import os 
 import numpy as np
-import pandas as pd 
+import pandas as pd
+import utils 
 
 
 def jacobi_rotation(C,a,b):
@@ -46,12 +47,13 @@ def rotate_covariance_matrix(C, a, b, J):
     return C
 
 
-def treelet_decomposition(X, L): 
+def treelet_decomposition(X, L, abs_ = False): 
     """
     Performs treelet decomposition to a specified depth. 
     Args:
         - X: nxp array of observations 
-        - L: treelet depth ∈ {1,...,p} 
+        - L: treelet depth ∈ {1,...,p}
+        - abs_: bool, determines whether 
         
     Returns a nested dictionary for the treelet decomposition at each level. 
         - C: estimated correlation matrix at level
@@ -60,9 +62,13 @@ def treelet_decomposition(X, L):
         - order: {0 = sum variable, 1 = difference varaible}
     """
     
-    C = np.cov(X)
-    n,p = X.shape
+    if (X.shape[0] == X.shape[1]): 
+        C = X 
+    else : 
+        C = np.cov(X)
+        
     mask = []
+    
     treelet = {0:{"C": C, 
                   "J": None,
                   "pair": (None, None), 
@@ -71,21 +77,20 @@ def treelet_decomposition(X, L):
     
     for l in range(1,L):
         
-        # find most correlated vars 
-        which_max = np.abs(np.triu(C, +1))
+        which_max = np.triu(C, +1)
+        if abs_:
+            which_max = np.abs(which_max)
+        k = (which_max == 0)
+        which_max[k] = -1 
+            
         if (l > 1):
             which_max[mask,:] = -1
-            which_max[:,mask] = -1    
+            which_max[:,mask] = -1 
+            
         a, b = np.unravel_index(np.argmax(which_max, axis = None), which_max.shape)
-        print((a,b))
-        
-        # calc. Jacobi rotation 
         J = jacobi_rotation(C, a, b)
-        
-        # update correlation matrix
         C = rotate_covariance_matrix(C,a,b,J)
         
-        # update treelet
         treelet[l] = {"C": C,
                       "J": J,
                       "pair": (a,b), 
@@ -93,6 +98,5 @@ def treelet_decomposition(X, L):
                      }
         
         mask += [b if C[a,a] > C[b,b] else a]
-        print(mask)
         
     return treelet
