@@ -1,9 +1,12 @@
 import os 
 import numpy as np
 import pandas as pd
+import scipy.stats as ss
+
 import utils 
 
 
+#
 def jacobi_rotation(C,a,b):
     """
     Finds a 2x2 Jacobi rotation matrix that decocorrelates two variables. 
@@ -28,6 +31,7 @@ def jacobi_rotation(C,a,b):
     return rotation
 
 
+#
 def rotate_covariance_matrix(C, a, b, J):
     """
     De-correlates two variables given their index and a Jacobi rotation matrix. 
@@ -46,6 +50,8 @@ def rotate_covariance_matrix(C, a, b, J):
     
     return C
 
+
+#
 def update_basis(B,J,a,b):
     """
     Updates basis function.
@@ -62,6 +68,7 @@ def update_basis(B,J,a,b):
     return basis
 
 
+#
 def treelet_decomposition(X, L, abs_ = False): 
     """
     Performs treelet decomposition to a specified depth. 
@@ -119,3 +126,71 @@ def treelet_decomposition(X, L, abs_ = False):
         mask += [b if C[a,a] > C[b,b] else a]
         
     return treelet
+
+
+#
+def energy_score(w,X): 
+    """
+    Returns normalised energy score for the column of a Dirac basis. 
+    Args: 
+        - w: px1 vector
+        - X: nxp matrix
+    """
+    p = X.shape[1]
+    
+    mean_cross_prod = [np.inner(w,X[:,i]) for i in range(p)]
+    mean_square_prod = sum(np.apply_along_axis(sum,1,X))**2 
+    energy = (sum(mean_cross_prod))**2 / mean_square_prod
+    
+    return energy
+
+
+# 
+def best_basis(tree, K, X): 
+    """
+    Finds best K-basis for a treelet decomposition by maximising the en
+    Args: 
+        - tree: nested dictionary returned by treelet_decomposition function
+        - K: dimesnion of treelet representation
+        - X: nxp matrix of observations
+        
+    Returns: 
+        - best_basis: 
+        - basis logger: the same information for every K-basis
+    """
+    
+    L = len(tree); p = len(tree[0]["B"])
+    best_basis = dict()
+    basis_logger = dict()
+    
+    basis = tree[0]["B"]
+    energies = [energy_score(basis[:,i],X) for i in range(p)]
+    energy_rankings = ss.rankdata(energies)
+    K_best = [i for i in range(p) if energy_rankings[i] <= K]
+    energy = sum([energies[i] for i in K_best])
+
+    basis_logger[0] = {"level": 0, 
+                       "energy": energy,
+                       "index": K_best,
+                       "basis": basis[:,K_best]
+                      }
+    best_basis = basis_logger[0]
+    
+    
+    for l in range(1,L): 
+        
+            basis = tree[l]["B"]
+            energies = [energy_score(basis[:,i],X) for i in range(p)]
+            energy_rankings = ss.rankdata(energies)
+            K_best = [i for i in range(p) if energy_rankings[i] <= K]
+            energy = sum([energies[i] for i in K_best])
+            
+            basis_logger[l] = {"level": l, 
+                               "energy": energy, 
+                               "index": K_best, 
+                               "basis": basis[:,K_best]
+                              }
+            if (energy > best_basis["energy"]): 
+                best_basis = basis_logger[l]
+        
+    return best_basis, basis_logger
