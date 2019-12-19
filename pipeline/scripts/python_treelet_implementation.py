@@ -46,6 +46,21 @@ def rotate_covariance_matrix(C, a, b, J):
     
     return C
 
+def update_basis(B,J,a,b):
+    """
+    Updates basis function.
+    Args: 
+        - J: 2x2 Jacobi rotation matrix
+        - B: pxp matrix representing basis function 
+    """
+    
+    p = B.shape[0]
+    R = np.identity(p)
+    R[a,a], R[a,b], R[b,a], R[b,b] = J.flatten()
+    basis = np.matmul(B,R)
+    
+    return basis
+
 
 def treelet_decomposition(X, L, abs_ = False): 
     """
@@ -58,6 +73,7 @@ def treelet_decomposition(X, L, abs_ = False):
     Returns a nested dictionary for the treelet decomposition at each level. 
         - C: estimated correlation matrix at level
         - J: rotation performed at level
+        - B: pxp matrix representing Dirac basis
         - pair: variables were merged
         - order: {0 = sum variable, 1 = difference varaible}
     """
@@ -66,15 +82,16 @@ def treelet_decomposition(X, L, abs_ = False):
         C = X 
     else : 
         C = np.cov(X)
-        
+    p = len(C); 
     mask = []
     
     treelet = {0:{"C": C, 
                   "J": None,
+                  "B": np.identity(p),
                   "pair": (None, None), 
                   "order": (None, None)}
               }
-    
+    B = np.identity(p)
     for l in range(1,L):
         
         which_max = np.triu(C, +1)
@@ -90,9 +107,11 @@ def treelet_decomposition(X, L, abs_ = False):
         a, b = np.unravel_index(np.argmax(which_max, axis = None), which_max.shape)
         J = jacobi_rotation(C, a, b)
         C = rotate_covariance_matrix(C,a,b,J)
+        B = update_basis(B,J,a,b)
         
         treelet[l] = {"C": C,
                       "J": J,
+                      "B": B, 
                       "pair": (a,b), 
                       "order": (1,0) if C[a,a] > C[b,b] else (0,1)
                      }
