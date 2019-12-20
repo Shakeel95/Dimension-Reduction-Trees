@@ -1,8 +1,5 @@
-import os 
 import numpy as np
-import pandas as pd
 import scipy.stats as ss
-
 import utils 
 
 
@@ -155,7 +152,7 @@ def best_basis(tree, K, X):
         - X: nxp matrix of observations
         
     Returns: 
-        - best_basis: 
+        - best_basis: d
         - basis logger: the same information for every K-basis
     """
     
