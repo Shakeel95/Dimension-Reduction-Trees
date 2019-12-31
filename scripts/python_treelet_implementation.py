@@ -18,7 +18,10 @@ def jacobi_rotation(C,a,b):
     C_bb = C[b,b]
     C_ab = C[a,b]
     
-    theta = 0.5*np.arctan(2*C_ab/(C_aa - C_bb))
+    if (C_aa - C_bb) != 0:
+        theta = 0.5*np.arctan(2*C_ab/(C_aa - C_bb))
+    else: 
+        theta = np.pi/4
     cos_theta = np.cos(theta)
     sine_theta = np.sin(theta)
     
@@ -85,7 +88,7 @@ def treelet_decomposition(X, L, abs_ = False):
     if (X.shape[0] == X.shape[1]): 
         C = X 
     else : 
-        C = np.cov(X)
+        C = np.cov(X, rowvar = False)
     p = len(C); 
     mask = []
     
