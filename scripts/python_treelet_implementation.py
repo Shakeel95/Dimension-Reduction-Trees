@@ -136,11 +136,11 @@ def energy_score(w,X):
         - w: px1 vector
         - X: nxp matrix
     """
-    p = X.shape[1]
+    n,p = X.shape
     
-    mean_cross_prod = [np.inner(w,X[:,i]) for i in range(p)]
-    mean_square_prod = sum(np.apply_along_axis(sum,1,X))**2 
-    energy = (sum(mean_cross_prod))**2 / mean_square_prod
+    mean_cross_prod = sum([np.inner(w,X[i,:])**2 for i in range(n)])
+    mean_square_prod = sum(np.apply_along_axis(np.linalg.norm,1,X)**2)
+    energy = mean_cross_prod / mean_square_prod
     
     return energy
 
@@ -166,7 +166,7 @@ def best_basis(tree, K, X):
     basis = tree[0]["B"]
     energies = [energy_score(basis[:,i],X) for i in range(p)]
     energy_rankings = ss.rankdata(energies)
-    K_best = [i for i in range(p) if energy_rankings[i] <= K]
+    K_best = [i for i in range(p) if energy_rankings[i] > p-K]
     energy = sum([energies[i] for i in K_best])
 
     basis_logger[0] = {"level": 0, 
@@ -182,7 +182,7 @@ def best_basis(tree, K, X):
             basis = tree[l]["B"]
             energies = [energy_score(basis[:,i],X) for i in range(p)]
             energy_rankings = ss.rankdata(energies)
-            K_best = [i for i in range(p) if energy_rankings[i] <= K]
+            K_best = [i for i in range(p) if energy_rankings[i] > p-K]
             energy = sum([energies[i] for i in K_best])
             
             basis_logger[l] = {"level": l, 
