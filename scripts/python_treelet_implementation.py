@@ -82,7 +82,7 @@ def treelet_decomposition(X, L, abs_ = False):
         - J: rotation performed at level
         - B: pxp matrix representing Dirac basis
         - pair: variables were merged
-        - order: {0 = sum variable, 1 = difference varaible}
+        - order: of pair is sum / difference variable
     """
     
     if (X.shape[0] == X.shape[1]): 
@@ -90,7 +90,7 @@ def treelet_decomposition(X, L, abs_ = False):
     else : 
         C = np.cov(X, rowvar = False)
     p = len(C); 
-    mask = []
+    difference_vars = []
     
     treelet = {0:{"C": C, 
                   "J": None,
@@ -109,8 +109,8 @@ def treelet_decomposition(X, L, abs_ = False):
         which_max[k] = -1 
             
         if (l > 1):
-            which_max[mask,:] = -1
-            which_max[:,mask] = -1 
+            which_max[difference_vars,:] = -1
+            which_max[:,difference_vars] = -1 
             
         a, b = np.unravel_index(np.argmax(which_max, axis = None), which_max.shape)
         J = jacobi_rotation(C, a, b)
@@ -121,10 +121,10 @@ def treelet_decomposition(X, L, abs_ = False):
                       "J": J,
                       "B": B, 
                       "pair": (a,b), 
-                      "order": (1,0) if C[a,a] > C[b,b] else (0,1)
+                      "order": ("sum","difference") if C[a,a] > C[b,b] else ("difference","sum")
                      }
         
-        mask += [b if C[a,a] > C[b,b] else a]        
+        difference_vars += [b if C[a,a] > C[b,b] else a]        
         
     return treelet
 
