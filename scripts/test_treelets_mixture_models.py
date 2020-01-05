@@ -77,7 +77,7 @@ def Bair_et_al(V,sigma,n):
     Args: 
         - V: pxk matrix of loading vectors
         - sigma: standard deviation of noise component
-        - n: sample size to draw
+        - n: sample size os sample to draw
     """
     
     p,k = V.shape
