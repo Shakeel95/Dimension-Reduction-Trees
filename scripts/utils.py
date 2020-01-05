@@ -13,17 +13,12 @@ def cov2cor(C):
     
     return CC
 
-
-#
-def geometric_series(a,r,n): 
+def extract_merge_order(tree): 
     """
-    Returns the first n terms in a geometric series. 
+    Extracts order in which variables were merged. 
     Args: 
-        - a: first term 
-        - r: common ratio
-        - n: number to terms to generate
+        - tree: nested dictionary returned by treelet function
     """
-    series = []
-    for i in range(n): 
-        series += [a*(r**i)]
-    return series
+    
+    merge_order = []
+    depth = 
