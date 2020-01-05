@@ -12,13 +12,3 @@ def cov2cor(C):
     CC = np.matmul(np.matmul(D,C),D)
     
     return CC
-
-def extract_merge_order(tree): 
-    """
-    Extracts order in which variables were merged. 
-    Args: 
-        - tree: nested dictionary returned by treelet function
-    """
-    
-    merge_order = []
-    depth = 
