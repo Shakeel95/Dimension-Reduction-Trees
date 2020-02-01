@@ -1,6 +1,6 @@
 # Dimension-Reduction-Trees 
  
-This project investigates the use of tree-like structures to reduce the dimensionality of / discover local structure within a large pannel of heterogeneous time series. 
+This repository explores variouse extensions of the treele transform poposed by [Lee, Nadler, and Wasserman](https://arxiv.org/abs/0707.0481). This is part of a larger project (the first in my PhD) investigating the use of tree-like structures to reduce the dimensionality of / discover local structure within a large pannel of heterogeneous time series. 
 
 ## Directories
 
