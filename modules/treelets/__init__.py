@@ -1,5 +1,4 @@
-import treelets.python_treelet_implementation
-import treelets.tail_greedy_treelet
-import treelets.test_treelets_mixture_models
-import treelets.UH_treelet
-import treelets.utils
+import treelets.treelet_schemes
+import treelets.treelet_plots
+import treelets.basis_selection
+import treelets.helper_functions
