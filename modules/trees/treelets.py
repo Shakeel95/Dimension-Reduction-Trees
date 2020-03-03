@@ -1,72 +1,10 @@
 import numpy as np
+import sys
 import scipy.stats as ss
-from treelets import utils
 
-
-#
-def jacobi_rotation(C,a,b):
-    """
-    Finds a 2x2 Jacobi rotation matrix that decocorrelates two variables. 
-    Args: 
-        - C: variance-covariance matrix
-        - a: index of first variable
-        - b: index of second variable
-    """
-    
-    p = len(C)
-    C_aa = C[a,a]
-    C_bb = C[b,b]
-    C_ab = C[a,b]
-    
-    if (C_aa - C_bb) == 0: 
-        theta = np.pi/4
-    else: 
-        theta = 0.5*np.arctan(2*C_ab/(C_aa - C_bb))
-    cos_theta = np.cos(theta)
-    sine_theta = np.sin(theta)
-    
-    rotation = np.array([[cos_theta, -sine_theta],
-                  [sine_theta, cos_theta]])
-    
-    return rotation
-
-
-#
-def rotate_covariance_matrix(C, a, b, J):
-    """
-    De-correlates two variables given their index and a Jacobi rotation matrix. 
-    Args: 
-        - J: 2x2 Jacobi rotation matrix
-        - C: variance-covaraince matrix 
-        - a: index of first variable
-        - b: index of second variable
-    """
-    
-    
-    p = C.shape[0]
-    R = np.identity(p)
-    R[a,a], R[a,b], R[b,a], R[b,b] = J.flatten()
-    C = np.matmul(np.matmul(R.transpose(),C),R)
-    
-    return C
-
-
-#
-def update_basis(B,J,a,b):
-    """
-    Updates basis function.
-    Args: 
-        - J: 2x2 Jacobi rotation matrix
-        - B: pxp matrix representing basis function 
-    """
-    
-    p = B.shape[0]
-    R = np.identity(p)
-    R[a,a], R[a,b], R[b,a], R[b,b] = J.flatten()
-    basis = np.matmul(B,R)
-    
-    return basis
-
+sys.path.append("../")
+from recover_factor_model.helper_functions import * 
+from .helper_functions import *
 
 #
 def treelet_decomposition(X, L, abs_ = False): 
@@ -101,7 +39,7 @@ def treelet_decomposition(X, L, abs_ = False):
     B = np.identity(p)
     for l in range(1,L):
         
-        cc = utils.cov2cor(C)
+        cc = cov2cor(C)
         which_max = np.triu(cc, +1)
         if abs_:
             which_max = np.abs(which_max)
@@ -125,6 +63,55 @@ def treelet_decomposition(X, L, abs_ = False):
                      }
         
         difference_vars += [b if C[a,a] > C[b,b] else a]        
+        
+    return treelet
+
+
+#
+def block_treelet_decomposition(X, L, block_size): 
+    """
+    Performs treelet decomposition to a specified depth. 
+    Args:
+        - X: nxp array of observations 
+        - L: treelet depth ∈ {1,...,p}
+        
+    Returns a nested dictionary for the treelet decomposition at each level. 
+        - C: estimated correlation matrix at level
+        - J: rotation performed at level
+        - B: pxp matrix representing Dirac basis
+        - pair: variables were merged
+        - order: of pair is sum / difference variable
+    """
+    
+    if (X.shape[0] == X.shape[1]): 
+        C = X 
+    else : 
+        C = np.cov(X, rowvar = False)
+    p = len(C); 
+    difference_vars = []
+    
+    treelet = {0:{"C": C, 
+                  "J": None,
+                  "B": np.identity(p),
+                  "block": None}}
+    B = np.identity(p)
+    
+    for l in range(1,L):
+            
+        block = max_weight_clique(C,block_size,set(difference_vars))
+        block_cov = build_block_cov(C,block)
+        eig = ordered_eigen_decomposition(block_cov)
+        J = build_indexed_Jacobi(block, eig, p)
+        
+        B, C = update_basis_rotate_cov(J, B, C)
+        
+        treelet[l] = {"C": C,
+                      "J": J,
+                      "B": B, 
+                      "block": block, 
+                     }
+        
+        difference_vars += list(block)[1:]
         
     return treelet
 
