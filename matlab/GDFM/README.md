@@ -1,6 +1,6 @@
 # Generalized Dynamic Factor Models
 
-Matlab code to estimate the Generalized Dynamic Factor Model as described in [Hallain et al](https://www.jstor.org/stable/2646650?seq=1#metadata_info_tab_contents). Code is taken from Matteo Barigozzi's [website](http://www.barigozzi.eu/Home.html); none of the code is mine.
+Matlab code to estimate the Generalized Dynamic Factor Model as described in [Hallin, Lippi, and Reichlin (2000)](https://www.jstor.org/stable/2646650?seq=1#metadata_info_tab_contents). Code is taken from Matteo Barigozzi's [website](http://www.barigozzi.eu/Home.html); none of the code is mine.
 
 
 ## Functions
